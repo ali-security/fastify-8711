@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   create_issue:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: |
       github.event.pull_request.merged &&
       contains(github.event.pull_request.labels.*.name, 'missing-types')

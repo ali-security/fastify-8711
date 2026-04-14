@@ -77,8 +77,8 @@ jobs:
           - '@fastify/websocket'
           - '@fastify/zipkin'
         node-version: ['20']
-        os: [ubuntu-latest]
-    uses: './.github/workflows/citgm-package.yml'
+        os: [ubuntu-24.04]
+    uses: ./.github/workflows/citgm-package.yml
     with:
       os: ${{ matrix.os }}
       package: ${{ matrix.package }}
@@ -89,7 +89,7 @@ jobs:
     needs:
       - core-plugins
     continue-on-error: true
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: write
     steps:
@@ -103,6 +103,6 @@ jobs:
           name: citgm-core-plugins
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: "echo Successfully removed label"
-      - run: "echo Could not remove label"
+      - run: echo Successfully removed label
+      - run: echo Could not remove label
         if: ${{ failure() }}

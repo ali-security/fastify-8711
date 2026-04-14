@@ -5,9 +5,9 @@ on:
 
 jobs:
   pull-request-title-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: fastify/action-pr-title@v0
       with:
-        regex: '/^(build|chore|ci|docs|feat|types|fix|perf|refactor|style|test)(?:\([^\):]*\))?:\s/'
+        regex: /^(build|chore|ci|docs|feat|types|fix|perf|refactor|style|test)(?:\([^\):]*\))?:\s/
         github-token: ${{ github.token }}

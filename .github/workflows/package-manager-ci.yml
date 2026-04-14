@@ -5,6 +5,7 @@ on:
     branches:
       - main
 
+      - master
 permissions:
   contents: read
 
@@ -17,12 +18,12 @@ jobs:
       matrix:
         # Maintenance and active LTS
         node-version: [16, 18, 20]
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         pnpm-version: [8]
         # pnpm@8 does not support Node.js 14 so include it separately
         include:
           - node-version: 14
-            os: ubuntu-latest
+            os: ubuntu-24.04
             pnpm-version: 7
 
     steps:
@@ -55,7 +56,7 @@ jobs:
       matrix:
         # Maintenance and active LTS
         node-version: [14, 16, 18, 20]
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
 
     steps:
       - uses: actions/checkout@v4

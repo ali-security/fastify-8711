@@ -6,65 +6,65 @@ on:
      - main
      - master
      - next
-     - 'v*'
+     - v*
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
+     - docs/**
+     - '*.md'
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
+     - docs/**
+     - '*.md'
 
 jobs:
   install-production:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    
+
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         runtime: [nsolid]
         node-version: [18, 20]
         pnpm-version: [8]
         include:
-          - nsolid-version: 5
-            node-version: 18
-            runtime: nsolid
-          - nsolid-version: 5
-            node-version: 20
-            runtime: nsolid
+         - nsolid-version: 5
+           node-version: 18
+           runtime: nsolid
+         - nsolid-version: 5
+           node-version: 20
+           runtime: nsolid
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
+     - uses: actions/checkout@v4
+       with:
+         persist-credentials: false
 
       # N|Solid 5 has no Node 18 build from setup-nsolid; use stock Node for 18.
-      - uses: actions/setup-node@v4
-        if: ${{ matrix.runtime == 'nsolid' && matrix.node-version == 18 }}
-        with:
-          node-version: ${{ matrix.node-version }}
+     - uses: actions/setup-node@v4
+       if: ${{ matrix.runtime == 'nsolid' && matrix.node-version == 18 }}
+       with:
+         node-version: ${{ matrix.node-version }}
 
-      - uses: nodesource/setup-nsolid@v1
-        if: ${{ matrix.runtime == 'nsolid' && matrix.node-version != 18 }}
-        with:
-          node-version: ${{ matrix.node-version }}
-          nsolid-version: ${{ matrix.nsolid-version }}
+     - uses: nodesource/setup-nsolid@v1
+       if: ${{ matrix.runtime == 'nsolid' && matrix.node-version != 18 }}
+       with:
+         node-version: ${{ matrix.node-version }}
+         nsolid-version: ${{ matrix.nsolid-version }}
 
-      - name: Install Pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ matrix.pnpm-version }}
-      
-      - name: Install Production
-        run: |
-          pnpm install --prod
+     - name: Install Pnpm
+       uses: pnpm/action-setup@v3
+       with:
+         version: ${{ matrix.pnpm-version }}
 
-      - name: Run server
-        run: |
-          node integration/server.js &
+     - name: Install Production
+       run: |
+         pnpm install --prod
 
-      - name: Test
-        if: ${{ success() }}
-        run: |
-          bash integration/test.sh
+     - name: Run server
+       run: |
+         node integration/server.js &
+
+     - name: Test
+       if: ${{ success() }}
+       run: |
+         bash integration/test.sh
