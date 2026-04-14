@@ -7,7 +7,7 @@ import { FastifyTypeProvider, FastifyTypeProviderDefault } from './type-provider
 import { FastifySchema } from './schema'
 import { FastifyInstance } from './instance'
 
-import pino from 'pino'
+import pino = require('pino')
 
 /**
  * Standard Fastify logging function
@@ -20,7 +20,8 @@ export type Bindings = pino.Bindings
 
 export type ChildLoggerOptions = pino.ChildLoggerOptions
 
-export interface FastifyBaseLogger extends pino.BaseLogger {
+export interface FastifyBaseLogger extends Omit<pino.BaseLogger, 'msgPrefix'> {
+  readonly msgPrefix?: string
   child(bindings: Bindings, options?: ChildLoggerOptions): FastifyBaseLogger
 }
 

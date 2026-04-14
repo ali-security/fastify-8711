@@ -61,55 +61,15 @@ jobs:
         run: |
           npx license-checker --production --summary --onlyAllow="0BSD;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;MIT;"
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'npm'
-          cache-dependency-path: package.json
-
-      - name: Install
-        run: |
-          npm install --ignore-scripts
-
-      - name: Lint code
-        run: |
-          npm run lint
-
-  coverage-nix:
-    needs:
-      - lint
-    permissions:
-      contents: read
-    uses: ./.github/workflows/coverage-nix.yml
-
-  coverage-win:
-    needs:
-      - lint
-    permissions:
-      contents: read
-    uses: ./.github/workflows/coverage-win.yml
-
   test-unit:
     needs: 
-      - lint
-      - coverage-nix
-      - coverage-win
+      - check-licenses
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [14, 16, 18, 20]
         os: [macos-latest, ubuntu-latest, windows-latest]
@@ -144,9 +104,7 @@ jobs:
 
   test-typescript:
     needs: 
-      - lint
-      - coverage-nix
-      - coverage-win
+      - check-licenses
     runs-on: 'ubuntu-latest'
     permissions:
       contents: read

@@ -1149,3 +1149,45 @@ test('Custom validator builder override by custom validator compiler in child in
   })
   t.equal(two.statusCode, 200)
 })
+
+test('Schema validation will not be bypassed by invalid content type', async function (t) {
+  t.plan(5)
+
+  var fastify = Fastify()
+
+  fastify.post('/', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: { foo: { type: 'string' } },
+        required: ['foo']
+      }
+    }
+  }, function (req, reply) { reply.send('ok') })
+
+  var found = await fastify.inject({
+    method: 'POST',
+    path: '/',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ foo: 'string' })
+  })
+  t.equal(found.statusCode, 200)
+
+  found = await fastify.inject({
+    method: 'POST',
+    path: '/',
+    headers: { 'content-type': 'ApPlIcAtIoN/JsOn\ta' },
+    body: JSON.stringify({ invalid: 'string' })
+  })
+  t.equal(found.statusCode, 415)
+  t.equal(found.json().code, 'FST_ERR_CTP_INVALID_MEDIA_TYPE')
+
+  found = await fastify.inject({
+    method: 'POST',
+    path: '/',
+    headers: { 'content-type': 'application/ json' },
+    body: JSON.stringify({ invalid: 'string' })
+  })
+  t.equal(found.statusCode, 415)
+  t.equal(found.json().code, 'FST_ERR_CTP_INVALID_MEDIA_TYPE')
+})

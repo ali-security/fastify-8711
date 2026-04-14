@@ -13,6 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
         # Maintenance and active LTS
         node-version: [16, 18, 20]
@@ -45,7 +46,7 @@ jobs:
         run: |
           pnpm run test:ci
         env:
-          NODE_OPTIONS: no-network-family-autoselection 
+          NODE_OPTIONS: no-network-family-autoselection
 
   yarn:
     runs-on: ${{ matrix.os }}
@@ -77,4 +78,4 @@ jobs:
         run: |
           yarn run test:ci
         env:
-          NODE_OPTIONS: no-network-family-autoselection 
+          NODE_OPTIONS: no-network-family-autoselection

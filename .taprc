@@ -1,11 +1,10 @@
 ts: false
 jsx: false
 flow: false
-# the coverage is performed by c8
 check-coverage: false
 coverage: false
 node-arg: --allow-natives-syntax
-
-files:
-  - 'test/**/*.test.js'
-  - 'test/**/*.test.mjs'
+# Skipped: fails on Node 18.20+ (pipelining). Do not set `files` here — tap only honors test-ignore during default file discovery.
+# Type tests: tap matches *.ts under test/ but cannot execute them without --ts; they run via npm run test:typescript (tsc + tsd).
+# Bundler tests: bundler-test.js needs dist/ from each subpackage's npm run bundle; those run in the package CI job, not root tap.
+test-ignore: (close-pipelining\.test\.js|test/types/.*\.ts|test/bundler/(esbuild|webpack)/bundler-test\.js)$

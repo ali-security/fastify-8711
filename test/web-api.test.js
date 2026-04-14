@@ -206,3 +206,81 @@ test('allow to pipe with undici.fetch', async (t) => {
   t.equal(response.statusCode, 200)
   t.same(response.json(), { ok: true })
 })
+
+test('WebStream should respect backpressure', async function (t) {
+  t.plan(3)
+
+  function delay (ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms)
+    })
+  }
+
+  const fastify = Fastify()
+  t.teardown(fastify.close.bind(fastify))
+
+  let drainEmittedAt = 0
+  let secondWriteAt = 0
+  let resolveSecondWrite
+  const secondWrite = new Promise(function (resolve) {
+    resolveSecondWrite = resolve
+  })
+
+  fastify.get('/', function (request, reply) {
+    const raw = reply.raw
+    const originalWrite = raw.write.bind(raw)
+    const bufferedChunks = []
+    let wroteFirstChunk = false
+
+    raw.once('drain', function () {
+      for (let i = 0; i < bufferedChunks.length; i++) {
+        originalWrite(bufferedChunks[i])
+      }
+    })
+
+    raw.write = function (chunk, encoding, cb) {
+      if (!wroteFirstChunk) {
+        wroteFirstChunk = true
+        bufferedChunks.push(Buffer.from(chunk))
+        delay(100).then(function () {
+          drainEmittedAt = Date.now()
+          raw.emit('drain')
+        })
+        if (typeof cb === 'function') {
+          cb()
+        }
+        return false
+      }
+      if (!secondWriteAt) {
+        secondWriteAt = Date.now()
+        resolveSecondWrite()
+      }
+      return originalWrite(chunk, encoding, cb)
+    }
+
+    const stream = new ReadableStream({
+      start: function (controller) {
+        controller.enqueue(Buffer.from('chunk-1'))
+      },
+      pull: function (controller) {
+        controller.enqueue(Buffer.from('chunk-2'))
+        controller.close()
+      }
+    })
+
+    reply.header('content-type', 'text/plain').send(stream)
+  })
+
+  await fastify.listen({ port: 0 })
+
+  const response = await undiciFetch('http://localhost:' + fastify.server.address().port + '/')
+  const bodyPromise = response.text()
+
+  await secondWrite
+  await delay(120)
+  const body = await bodyPromise
+
+  t.equal(response.status, 200)
+  t.equal(body, 'chunk-1chunk-2')
+  t.ok(secondWriteAt >= drainEmittedAt)
+})

@@ -379,7 +379,7 @@ test('catch all content type parser', t => {
         url: getServerUrl(fastify),
         body: 'hello',
         headers: {
-          'Content-Type': 'very-weird-content-type'
+          'Content-Type': 'very-weird-content-type/foo'
         }
       }, (err, response, body) => {
         t.error(err)
@@ -391,7 +391,7 @@ test('catch all content type parser', t => {
   })
 })
 
-test('catch all content type parser should not interfere with other conte type parsers', t => {
+test('catch all content type parser should not interfere with other content type parsers', t => {
   t.plan(7)
   const fastify = Fastify()
 
@@ -433,7 +433,7 @@ test('catch all content type parser should not interfere with other conte type p
         url: getServerUrl(fastify),
         body: 'hello',
         headers: {
-          'Content-Type': 'very-weird-content-type'
+          'Content-Type': 'very-weird-content-type/foo'
         }
       }, (err, response, body) => {
         t.error(err)
